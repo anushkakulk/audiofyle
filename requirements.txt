@@ -1,0 +1,5 @@
+Flask
+spotipy
+numpy
+scikit-learn
+requests
