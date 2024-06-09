@@ -21,27 +21,36 @@ class AuthHandler(BaseHTTPRequestHandler):
         self.server.token_info = token_info
 
         self.wfile.write(
-            b'authentication successful. you can close this window.')
+            b'Authentication successful. You can close this window.')
 
 def start_local_server(server, handler):
     server.serve_forever()
 
-def authenticate():
-    sp_oauth = SpotifyOAuth(client_id='', client_secret='',
-                            redirect_uri='http://localhost:5000/callback', scope='user-library-read')
+@app.route('/auth-url', methods=['POST'])
+def get_auth_url():
+    data = request.json
+    client_id = data.get('client_id')
+    client_secret = data.get('client_secret')
+    
+    if not client_id or not client_secret:
+        return jsonify({'error': 'client_id and client_secret are required'}), 400
 
+    sp_oauth = SpotifyOAuth(client_id=client_id, client_secret=client_secret,
+                            redirect_uri='http://localhost:5000/callback', scope='user-library-read')
+    
+    auth_url = sp_oauth.get_authorize_url()
+
+    # Store the OAuth object in the server object for later use
     server = HTTPServer(('localhost', 5000), AuthHandler)
     server.sp_oauth = sp_oauth
-    server_thread = threading.Thread(
-        target=start_local_server, args=(server, AuthHandler))
+    server_thread = threading.Thread(target=start_local_server, args=(server, AuthHandler))
     server_thread.start()
 
-    auth_url = sp_oauth.get_authorize_url()
-    webbrowser.open_new(auth_url)
-    server_thread.join()
+    return jsonify({'auth_url': auth_url})
 
-    sp = spotipy.Spotify(auth=server.token_info['access_token'])
-    return sp
+if __name__ == '__main__':
+    app.run(debug=True)
+
 
 def get_recommendations(user_preferences):
     # auth with spotify

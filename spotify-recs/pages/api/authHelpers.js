@@ -1,4 +1,4 @@
-import { authCreds } from '/authCreds';
+import { authCreds } from '../../authCreds';
 import axios from "axios";
 
 const authHelpers = {
@@ -7,8 +7,8 @@ const authHelpers = {
       + '?response_type=token'
       + '&client_id=' + encodeURIComponent(authCreds.client_id)
       + '&scope=' + encodeURIComponent(authCreds.scope)
-      + '&redirect_uri=' + encodeURIComponent(authCreds.redirect_uri);
-    //   + '&state=' + encodeURIComponent(authCreds.state);
+      + '&redirect_uri=' + encodeURIComponent(authCreds.redirect_uri)
+      + '&state=' + encodeURIComponent(authCreds.state);
     window.location.href = url;
   },
   getHashCode: function () {
